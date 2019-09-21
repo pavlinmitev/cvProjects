@@ -1,0 +1,18 @@
+#bars div{
+    width: 24px;
+    height: 5px;
+    background-color: red;
+    margin-bottom: 4px;
+    transition: 1s;
+}
+.class1{
+    
+    transform:rotate(135deg) translate(6px,-6px);
+    
+}
+.class2{
+    transform: rotate(45deg);
+}
+.class3{
+    display: none;
+}
