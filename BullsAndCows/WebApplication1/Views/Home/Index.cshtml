@@ -1,0 +1,251 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}<br />
+<link rel="stylesheet" href="~/css/personalCSS.css" />
+<div class="center">
+    <h2>Enter A 4 digit Number with different digits</h2>
+</div>
+<div>
+<div class="center"></div>
+<p id="error" style="color:red;"></p>
+<div class="green-square">
+    <div>
+        <input type="number" id="num" style="width:200px;" class="form-control " />
+    </div>
+
+    <div class="inner-b">
+        <button id="bt" class="btn-success form-control " style="width:100px;">Enter</button>
+    </div>
+
+</div>
+
+<p id="res"> </p>
+<div  class="move-down">
+    <ul id="resultList" class="list-group"></ul>
+</div>
+    </div>
+
+<br />
+<br />
+<br />
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $("#bt").click(function (event) {
+                event.preventDefault();
+            });
+            $("#bt").click(SendDataToController);
+
+            function SendDataToController() {
+                let counter = 0;
+                let tr = true;
+                let num = $("#num").val();
+                let arr = [];
+                let arr2 = [];
+                var numS = num.toString();
+                for (let i = 0; i < numS.length; i++) {
+                    if (!arr2.includes(numS[i])) {
+                        arr2.push(numS[i])
+
+                    }
+                    else {
+                       
+                        let errorBox = $('#error');
+                        errorBox.html("invalid");
+                        errorBox.fadeIn();
+                        setTimeout(() => errorBox.fadeOut(), 3000);
+                        tr = false;
+                        break;
+                    }
+                    counter++;
+                }
+                if (tr == true && numS.length === 4) {
+
+                    let result = finalResult();
+                    let date = new Date().toLocaleString();
+                   
+                    
+
+
+
+
+                    $.ajax({
+                        url: "/api/GameApi/play",
+
+                        method: "GET",
+                        data: {
+                            Counter: result.Counter,
+                            Date: new Date().toLocaleString(),
+                            Numbers: num,
+                            Duration: Number(date.toString().split(":")[1].split(" ")[0]) - Number(new Date().toLocaleString().toString().split(":")[1].split(" ")[0])
+
+                        }
+                    })
+                        .then(function (res) {
+                            console.log(res);
+                        })
+                        .catch(function () {
+                            let errorBox = $('#error');
+                            errorBox.text("You must be logged in");
+                            errorBox.fadeIn();
+                            setTimeout(() => errorBox.fadeOut(), 3000);
+                        });
+
+                }
+            }
+        })
+    </script>
+    <script>
+        function finalResult() {
+            var element = document.getElementById("resultList");
+            element.innerHTML = "";
+            var number = Number(document.getElementById("num").value);
+
+            var guess = solve();
+
+
+            let bulls = 0;
+            let cows = 0;
+            let counter = 0;
+
+            while (bulls != 4 || (bulls == 2 && cows == 2)) {
+                let cowIndex = [];
+                let BullIndex = [];
+                var num = number.toString().split('');
+                var num2 = guess.toString().split('');
+                bulls = 0;
+                cows = 0;
+                for (let i = 0; i < number.toString().length; i++) {
+                    for (let j = 0; j < number.toString().length; j++) {
+                        if (num2[i] == num[j] && i == j) {
+
+                            bulls++;
+                            BullIndex.push(j);
+                            break;
+
+
+
+                        }
+                        else if (num2[i] == num[j]) {
+                            cowIndex.push(j);
+                            cows++;
+                        }
+                    }
+                }
+
+                if (bulls == 4 || (bulls == 2 && cows == 2)) {
+                    counter++;
+                    console.log("Number guessed after " + counter + " tries");
+                    return { Counter: counter };
+                }
+                else {
+                    let checkIfSame = false;
+                    let cowUsedIndexes = [];
+                    let cowNumbers = [];
+
+                    for (let i = 0; i < cowIndex.length; i++) {
+                        var n = Number(num[cowIndex[i]].toString());
+
+                        cowNumbers.push(n);
+                    }
+                    var array = [];
+                    for (let i = 0; i < 4; i++) {
+                        array[i] = -1;
+                    }
+                    for (let i = 0; i < BullIndex.length; i++) {
+                        array[BullIndex[i]] = Number(num[BullIndex[i]].toString());
+                    }
+                    for (let i = 0; i < array.length; i++) {
+                        if (array[i] == -1) {
+                            while (cowNumbers.Count > 0) {
+
+                                var index = getRndInteger(0, cowNumbers.length);
+
+                                array[i] = cowNumbers[index];
+                                cowUsedIndexes.push(index);
+                                cowNumbers.splice(index, 1);
+
+
+
+                            }
+                        }
+
+                    }
+                    var list = [];
+                    list.push(array[0]);
+                    list.push(array[1]);
+                    list.push(array[2]);
+                    list.push(array[3]);
+
+                    for (let i = 0; i < 4; i++) {
+                        if (array[i] == -1) {
+
+
+                            var nums = getRndInteger(0, 10);
+
+                            while (list.includes(nums)) {
+                                nums = getRndInteger(0, 10);
+                            }
+
+                          
+                            array[i] = nums;
+
+                        }
+                    }
+                    var final = Number(array.join(''));
+                    guess = final;
+                    let rList = document.getElementById("resultList");
+                    let li = document.createElement("li");
+                    li.textContent = guess;
+                    li.className = "list-group-item list-group-item-action";
+                    rList.appendChild(li);
+                    counter++;
+                    
+
+
+
+                }
+            }
+
+
+        }
+
+
+
+
+    </script>
+
+
+
+    <script>
+
+        function solve() {
+
+            var check = false;
+            while (check == false) {
+                var n1 = getRndInteger(1000, 9999);
+                var charArr = n1.toString().split('');
+                for (let i = 0; i < n1.toString().length - 1; i++) {
+                    if (charArr[i] == charArr[i + 1]) {
+                        check = false;
+                        break;
+
+                    }
+                    check = true;
+
+                }
+            }
+            return n1;
+
+        }
+    </script>
+
+    <script>
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+    </script>
+
+}
+

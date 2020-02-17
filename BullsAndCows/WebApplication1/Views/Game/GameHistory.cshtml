@@ -1,0 +1,24 @@
+﻿@model  IEnumerable<WebApplication1.Models.Game>
+@{
+    ViewData["Title"] = "GameHistory";
+}
+<link rel="stylesheet" href="~/css/personalCSS.css" />
+<h2>GameHistory</h2>
+<table class="table table-hover">
+    <tr>
+        <th scope="col">date</th>
+        <th scope="col">duration</th>
+        <th scope="col">Counter</th>
+        <th scope="col">Guessed</th>
+    </tr>
+    @foreach(var game in @Model)
+    {
+    <tr class="table-active">
+        <td>@game.Date</td>
+        <td>@game.Duration</td>
+        <td>@game.Counter</td>
+        <td>@game.GuessedNumber</td>
+    </tr>
+
+    }
+</table>
